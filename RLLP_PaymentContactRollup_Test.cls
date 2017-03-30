@@ -1,3 +1,7 @@
+/* TODO: this enters a couple donations, calculates the rollup, and checks the totals.
+ * not sure what else it should do.
+ */
+
 @isTest
 public class RLLP_PaymentContactRollup_TEST {
 	public static testMethod void testContactPaymentRollup() {
@@ -24,12 +28,11 @@ public class RLLP_PaymentContactRollup_TEST {
                                                                 Role = 'Donor');
         insert role;
         
-		//Database.executeBatch(new ContactPaymentRollup2_BATCH());
-		Test.StartTest();
+        Test.StartTest();
         Id batchProcessId = Database.executeBatch(new RLLP_PaymentContactRollup_BATCH());
         Test.stopTest();
         
-		Contact con1_after = [select id, Total_Payments__c from Contact where id = :con1.id][0];        
+        Contact con1_after = [select id, Total_Payments__c from Contact where id = :con1.id][0];        
         Contact con2_after = [select id, Total_Payments__c from Contact where id = :con2.id][0];
         
         System.assertEquals(100, con1_after.Total_Payments__c);
