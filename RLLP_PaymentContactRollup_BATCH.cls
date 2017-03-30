@@ -1,3 +1,13 @@
+/* Right now, this fills a single field named Total_Payments__c (on Contact) with the total of all
+ * paid Payments on opportunities for which the contact is the primary opportunity-contact role.
+ *
+ * TODO:
+ * - add fiscal year and last N day rollups
+ * - make it work with different NPSP settings (fiscal year, multicurrency...?)
+ * - make real-time (TDTM)
+ * - figure out how to merge into NPSP
+ */
+
 global class RLLP_PaymentContactRollup_BATCH implements Database.Batchable<sObject> {
 	global Database.QueryLocator start(Database.BatchableContext bc) {
         return Database.getQueryLocator('select Id, Total_Payments__c from Contact');
@@ -10,7 +20,7 @@ global class RLLP_PaymentContactRollup_BATCH implements Database.Batchable<sObje
             // reset more rollups here
         }
         
-		// find opportunity-contact roles marked primary for these contacts
+        // find opportunity-contact roles marked primary for these contacts
         List<OpportunityContactRole> ocrs = [select OpportunityId, ContactId from OpportunityContactRole
                                                     where ContactId in :conMap.keySet()
                                             		and isPrimary = true]; // TODO: more filters necessary?
@@ -18,19 +28,19 @@ global class RLLP_PaymentContactRollup_BATCH implements Database.Batchable<sObje
         Map<Id, Id> oppId_to_conId = new Map<Id, Id>();
         for (OpportunityContactRole ocr : ocrs) oppId_to_conId.put(ocr.OpportunityId, ocr.ContactId);
         
-		// find paid payments on opportunities for which the contacts have a primary OCR
+        // find paid payments on opportunities for which the contacts have a primary OCR
         List<npe01__OppPayment__c> pmts = [select Id, npe01__Payment_Amount__c, npe01__Opportunity__c
                                           from npe01__OppPayment__c
                                           where npe01__Opportunity__c in :oppId_to_conId.keySet()
                                           and npe01__Paid__c = true];
         
-		// loop through payments, accumulating the payment amounts on the contact
+        // loop through payments, accumulating the payment amounts on the contact
         for (npe01__OppPayment__c pmt : pmts) {
             conMap.get(oppId_to_conId.get(pmt.npe01__Opportunity__c)).Total_Payments__c +=
                 					pmt.npe01__Payment_Amount__c;
         }
         
-		// update the contacts
+        // update the contacts
         update conList;
     }
     
@@ -38,3 +48,4 @@ global class RLLP_PaymentContactRollup_BATCH implements Database.Batchable<sObje
 
     }
 }
+	
