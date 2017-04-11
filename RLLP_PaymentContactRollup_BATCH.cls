@@ -11,7 +11,7 @@
  */
 
 global class RLLP_PaymentContactRollup_BATCH implements
-	Database.Batchable<sObject>, Database.stateful {
+	Database.Batchable<sObject>, Database.stateful, Schedulable {
 	
 	private Date currentYearStart;
     private Integer ndays;
@@ -96,5 +96,16 @@ global class RLLP_PaymentContactRollup_BATCH implements
         update conList;
     }
     
-    global void finish(Database.BatchableContext bc) { }
+    global void finish(Database.BatchableContext bc) {
+		Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+        mail.setToAddresses(new String[] {'lorenserfass331@gmail.com'});
+        mail.setSenderDisplayName('Salesforce batch process');
+        mail.setSubject('Your payment rollup batch finished.');
+        mail.setPlainTextBody('Congratulations!!!!!!!!!!!!');
+        Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+    }
+        
+    global void execute(SchedulableContext sc) {
+        Database.executeBatch(new RLLP_PaymentContactRollup_BATCH());
+    }
 }
