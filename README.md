@@ -8,6 +8,6 @@ Also planned: dates of first and last payment, etc.
 
 Just like the NPSP rollup fields, the class calculates the totals according to NPSP preferences (whether or not to use fiscal year, the N-day preference, and opportunity exclusions).
 
-This does not yet calculate rollups in real time; it is batchable. I will also make it schedulable.
+This does not yet calculate rollups in real time; it is schedulable batch Apex.
 
 This class depends on several others from the Nonprofit Success Pack. At this point it works only with the unmanaged version of the NPSP.
